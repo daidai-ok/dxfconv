@@ -1,0 +1,62 @@
+package renderers
+
+import (
+	"io"
+
+	svg "github.com/ajstarks/svgo"
+)
+
+// SVGRenderer implements the Renderer interface for SVG output
+type SVGRenderer struct {
+	canvas *svg.SVG
+	width  float64
+	height float64
+}
+
+// NewSVGRenderer creates a new SVGRenderer
+func NewSVGRenderer(w io.Writer, width, height float64) *SVGRenderer {
+	canvas := svg.New(w)
+	return &SVGRenderer{canvas: canvas, width: width, height: height}
+}
+
+func (r *SVGRenderer) Init(width, height float64) {
+	r.canvas.Start(int(width), int(height))
+	r.canvas.Rect(0, 0, int(width), int(height), "fill:none;stroke:none") // Optional background
+}
+
+func (r *SVGRenderer) Line(x1, y1, x2, y2 float64) {
+	r.canvas.Line(int(x1), int(y1), int(x2), int(y2), "stroke:black;stroke-width:1")
+}
+
+func (r *SVGRenderer) Circle(x, y, radius float64) {
+	r.canvas.Circle(int(x), int(y), int(radius), "fill:none;stroke:black;stroke-width:1")
+}
+
+func (r *SVGRenderer) Arc(x, y, radius, startAngle, endAngle float64) {
+	// svgo Arc is (x, y, rx, ry, rot, large, sweep, ex, ey)
+	// We need to calculate end point from angles.
+	// This is a bit complex for SVG paths.
+	// For now, let's approximate or implement arc path calculation.
+	r.canvas.Arc(int(x), int(y), int(radius), int(radius), 0, false, false, int(x+radius), int(y), "fill:none;stroke:black")
+	// TODO: Correct Arc implementation
+}
+
+func (r *SVGRenderer) Polyline(points [][]float64, closed bool) {
+	x := make([]int, len(points))
+	y := make([]int, len(points))
+	for i, p := range points {
+		x[i] = int(p[0])
+		y[i] = int(p[1])
+	}
+	style := "fill:none;stroke:black;stroke-width:1"
+	if closed {
+		r.canvas.Polygon(x, y, style)
+	} else {
+		r.canvas.Polyline(x, y, style)
+	}
+}
+
+func (r *SVGRenderer) Finish() error {
+	r.canvas.End()
+	return nil
+}
