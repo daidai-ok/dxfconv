@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	dxfconverter "dxfconv/pkg/converter"
+	dxfconv "github.com/daidai-ok/dxfconv/pkg/converter"
 )
 
 func main() {
@@ -30,12 +30,12 @@ func main() {
 	}
 	defer func() { _ = outputFile.Close() }()
 
-	opts := dxfconverter.DefaultOptions()
-	opts.Format = dxfconverter.FormatPDF
+	opts := dxfconv.DefaultOptions()
+	opts.Format = dxfconv.FormatPDF
 	// Example: Customize options if needed
-	// opts.Orientation = dxfconverter.OrientationLandscape
+	// opts.Orientation = dxfconv.OrientationLandscape
 
-	err = dxfconverter.Convert(inputFile, outputFile, opts)
+	err = dxfconv.Convert(inputFile, outputFile, opts)
 	if err != nil {
 		fmt.Printf("Error converting DXF to PDF: %v\n", err)
 		os.Exit(1)

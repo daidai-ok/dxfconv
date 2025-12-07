@@ -1,4 +1,4 @@
-module dxfconv
+module github.com/daidai-ok/dxfconv
 
 go 1.25.5
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	dxfconverter "dxfconv/pkg/converter"
+	dxfconv "github.com/daidai-ok/dxfconv/pkg/converter"
 )
 
 func main() {
@@ -25,12 +25,12 @@ func main() {
 	// Create a buffer to write to
 	var buf bytes.Buffer
 
-	opts := dxfconverter.DefaultOptions()
+	opts := dxfconv.DefaultOptions()
 	// You can choose PDF or SVG
-	opts.Format = dxfconverter.FormatPDF
+	opts.Format = dxfconv.FormatPDF
 
 	// Pass the buffer as the io.Writer
-	err = dxfconverter.Convert(inputFile, &buf, opts)
+	err = dxfconv.Convert(inputFile, &buf, opts)
 	if err != nil {
 		fmt.Printf("Error converting to buffer: %v\n", err)
 		os.Exit(1)

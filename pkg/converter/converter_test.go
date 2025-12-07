@@ -12,7 +12,7 @@ import (
 	"github.com/yofu/dxf/drawing"
 	"github.com/yofu/dxf/entity"
 
-	"dxfconv/pkg/dxfconverror"
+	"github.com/daidai-ok/dxfconv/pkg/dxfconverror"
 )
 
 func TestConvert_PDF(t *testing.T) {

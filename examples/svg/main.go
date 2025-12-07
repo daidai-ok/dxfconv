@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	dxfconverter "dxfconv/pkg/converter"
+	dxfconv "github.com/daidai-ok/dxfconv/pkg/converter"
 )
 
 func main() {
@@ -30,10 +30,10 @@ func main() {
 	}
 	defer func() { _ = outputFile.Close() }()
 
-	opts := dxfconverter.DefaultOptions()
-	opts.Format = dxfconverter.FormatSVG
+	opts := dxfconv.DefaultOptions()
+	opts.Format = dxfconv.FormatSVG
 
-	err = dxfconverter.Convert(inputFile, outputFile, opts)
+	err = dxfconv.Convert(inputFile, outputFile, opts)
 	if err != nil {
 		fmt.Printf("Error converting DXF to SVG: %v\n", err)
 		os.Exit(1)

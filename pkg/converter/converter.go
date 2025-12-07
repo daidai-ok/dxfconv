@@ -9,9 +9,9 @@ import (
 	"github.com/yofu/dxf/drawing"
 	"github.com/yofu/dxf/entity"
 
-	"dxfconv/pkg/boundingbox"
-	"dxfconv/pkg/dxfconverror"
-	"dxfconv/pkg/renderers"
+	"github.com/daidai-ok/dxfconv/pkg/boundingbox"
+	"github.com/daidai-ok/dxfconv/pkg/dxfconverror"
+	"github.com/daidai-ok/dxfconv/pkg/renderers"
 )
 
 // Convert reads DXF data from r and writes PDF data to w
