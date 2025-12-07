@@ -17,7 +17,7 @@ type PDFRenderer struct {
 func NewPDFRenderer(w io.Writer, orientation string, width, height float64, fontPath string) *PDFRenderer {
 	pdf := gofpdf.New(orientation, "mm", "A4", "")
 	pdf.AddPageFormat(orientation, gofpdf.SizeType{Wd: width, Ht: height})
-	pdf.AddPage()
+	pdf.SetAutoPageBreak(false, 0)
 
 	fontFamily := "Arial"
 	if fontPath != "" {
