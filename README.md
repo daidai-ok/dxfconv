@@ -1,6 +1,16 @@
-# dxfconv
+<p align="center">
+  <img alt="dxfconv logo" src="docs/icon.png" height="140" />
+  <h3 align="center">dxfconv</h3>
+  <p align="center">A lightweight CAD DXF converter</p>
+</p>
+
+---
 
 `dxfconv` is a lightweight Go library for converting DXF (Drawing Exchange Format) files into PDF or SVG. It is designed to be simple to use and easy to integrate into your Go applications.
+
+<p align="center">
+  <img alt="summary" src="docs/summary.png" height="380" />
+</p>
 
 ## Features
 
@@ -12,12 +22,15 @@
     -   CIRCLES
     -   ARCS
     -   LWPOLYLINES
+    -   POLYLINES
+    -   SPLINES
+    -   TEXT
 -   **Customization**: Control page size (A4, A3, etc.), orientation (Portrait, Landscape), and scaling.
 
 ## Installation
 
 ```bash
-go get github.com/yourusername/dxfconv
+go get github.com/daidai-ok/dxfconv
 ```
 
 ## Usage
@@ -77,3 +90,6 @@ dxfconv.Convert(f, out, opts)
 ## License
 
 MIT License
+
+The [Go gopher](https://go.dev/blog/gopher) was designed by [Renée French](https://reneefrench.blogspot.com/).
+The project icon is based on [gophers](https://github.com/egonelbre/gophers) by [Egon Elbre](https://github.com/egonelbre), licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).

@@ -21,14 +21,14 @@ func main() {
 		fmt.Printf("Error opening input file: %v\n", err)
 		os.Exit(1)
 	}
-	defer inputFile.Close()
+	defer func() { _ = inputFile.Close() }()
 
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		fmt.Printf("Error creating output file: %v\n", err)
 		os.Exit(1)
 	}
-	defer outputFile.Close()
+	defer func() { _ = outputFile.Close() }()
 
 	opts := dxfconverter.DefaultOptions()
 	opts.Format = dxfconverter.FormatSVG

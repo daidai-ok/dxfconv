@@ -20,7 +20,7 @@ func main() {
 		fmt.Printf("Error opening input file: %v\n", err)
 		os.Exit(1)
 	}
-	defer inputFile.Close()
+	defer func() { _ = inputFile.Close() }()
 
 	// Create a buffer to write to
 	var buf bytes.Buffer
