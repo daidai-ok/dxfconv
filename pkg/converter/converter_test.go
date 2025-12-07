@@ -11,6 +11,8 @@ import (
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/drawing"
 	"github.com/yofu/dxf/entity"
+
+	"dxfconv/pkg/dxfconverror"
 )
 
 func TestConvert_PDF(t *testing.T) {
@@ -113,7 +115,7 @@ func TestConvert_ReadError(t *testing.T) {
 		t.Error("Expected error for faulty reader, but got nil")
 	}
 
-	var internalErr *InternalError
+	var internalErr *dxfconverror.InternalError
 	if !errors.As(err, &internalErr) {
 		t.Errorf("Expected InternalError, got %T: %v", err, err)
 	}
@@ -137,7 +139,7 @@ func TestConvert_BrokenDXF(t *testing.T) {
 		t.Fatal("Expected error for broken DXF, but got nil")
 	}
 
-	var parseErr *ParseError
+	var parseErr *dxfconverror.ParseError
 	if !errors.As(err, &parseErr) {
 		t.Errorf("Expected ParseError, got %T: %v", err, err)
 	}

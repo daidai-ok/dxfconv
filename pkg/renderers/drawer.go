@@ -1,11 +1,11 @@
-package converter
+package renderers
 
 import (
 	"github.com/yofu/dxf/entity"
 )
 
 // drawEntity draws a single DXF entity using the Renderer
-func drawEntity(r Renderer, e entity.Entity, scale float64, offsetX, offsetY float64, height float64) {
+func DrawEntity(r Renderer, e entity.Entity, scale float64, offsetX, offsetY float64, height float64) {
 	transformX := func(x float64) float64 {
 		return (x * scale) + offsetX
 	}

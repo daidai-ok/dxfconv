@@ -6,8 +6,11 @@ import (
 	"os"
 
 	"github.com/yofu/dxf"
+	"github.com/yofu/dxf/drawing"
 	"github.com/yofu/dxf/entity"
 
+	"dxfconv/pkg/boundingbox"
+	"dxfconv/pkg/dxfconverror"
 	"dxfconv/pkg/renderers"
 )
 
@@ -23,56 +26,26 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 	// TODO: In the future, we aim to remove the dependency on github.com/yofu/dxf to allow for more flexible inclusion of metadata such as error location in parse errors.
 	tempFile, err := os.CreateTemp("", "dxf-*.dxf")
 	if err != nil {
-		return &InternalError{Err: fmt.Errorf("failed to create temp file: %w", err)}
+		return &dxfconverror.InternalError{Err: fmt.Errorf("failed to create temp file: %w", err)}
 	}
 	defer os.Remove(tempFile.Name()) // clean up
 
 	_, err = io.Copy(tempFile, r)
 	if err != nil {
-		return &InternalError{Err: fmt.Errorf("failed to write to temp file: %w", err)}
+		return &dxfconverror.InternalError{Err: fmt.Errorf("failed to write to temp file: %w", err)}
 	}
 	tempFile.Close()
 
 	dxfDrawing, err := dxf.Open(tempFile.Name())
 	if err != nil {
-		return &ParseError{Err: fmt.Errorf("failed to parse DXF: %w", err)}
+		return &dxfconverror.ParseError{Err: fmt.Errorf("failed to parse DXF: %w", err)}
 	}
 
 	// Calculate Bounding Box
-	bb := NewBoundingBox()
-	for _, e := range dxfDrawing.Entities() {
-		switch e := e.(type) {
-		case *entity.Line:
-			bb.Update(e.Start[0], e.Start[1])
-			bb.Update(e.End[0], e.End[1])
-		case *entity.Circle:
-			bb.Update(e.Center[0]-e.Radius, e.Center[1]-e.Radius)
-			bb.Update(e.Center[0]+e.Radius, e.Center[1]+e.Radius)
-		case *entity.LwPolyline:
-			for _, v := range e.Vertices {
-				bb.Update(v[0], v[1])
-			}
-		case *entity.Polyline:
-			for _, v := range e.Vertices {
-				bb.Update(v.Coord[0], v.Coord[1])
-			}
-		case *entity.Spline:
-			for _, v := range e.Controls {
-				bb.Update(v[0], v[1])
-			}
-		case *entity.Point:
-			bb.Update(e.Coord[0], e.Coord[1])
-		case *entity.Text:
-			bb.Update(e.Coord1[0], e.Coord1[1])
-			// Text width/height is complicated to calculate without font metrics, so we only include the anchor point.
-			// Or we could approximate:
-			// bb.Update(e.Coord1[0], e.Coord1[1] + e.Height)
-			// For now, let's Stick to the anchor point to avoid incorrect expansion.
-		}
-	}
+	bb := calculateBoundingBox(dxfDrawing)
 
 	// Setup Renderer
-	var renderer Renderer
+	var renderer renderers.Renderer
 	pageW, pageH := opts.PageSize.Width, opts.PageSize.Height
 	if opts.Orientation == OrientationLandscape {
 		pageW, pageH = pageH, pageW
@@ -133,11 +106,46 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 
 	// Draw Entities
 	for _, e := range dxfDrawing.Entities() {
-		drawEntity(renderer, e, scale, realOffsetX, realOffsetY, pageH)
+		renderers.DrawEntity(renderer, e, scale, realOffsetX, realOffsetY, pageH)
 	}
 
 	if err := renderer.Finish(); err != nil {
-		return &RenderingError{Err: err}
+		return &dxfconverror.RenderingError{Err: err}
 	}
 	return nil
+}
+
+func calculateBoundingBox(dxfDrawing *drawing.Drawing) *boundingbox.BoundingBox {
+	bb := boundingbox.NewBoundingBox()
+	for _, e := range dxfDrawing.Entities() {
+		switch e := e.(type) {
+		case *entity.Line:
+			bb.Update(e.Start[0], e.Start[1])
+			bb.Update(e.End[0], e.End[1])
+		case *entity.Circle:
+			bb.Update(e.Center[0]-e.Radius, e.Center[1]-e.Radius)
+			bb.Update(e.Center[0]+e.Radius, e.Center[1]+e.Radius)
+		case *entity.LwPolyline:
+			for _, v := range e.Vertices {
+				bb.Update(v[0], v[1])
+			}
+		case *entity.Polyline:
+			for _, v := range e.Vertices {
+				bb.Update(v.Coord[0], v.Coord[1])
+			}
+		case *entity.Spline:
+			for _, v := range e.Controls {
+				bb.Update(v[0], v[1])
+			}
+		case *entity.Point:
+			bb.Update(e.Coord[0], e.Coord[1])
+		case *entity.Text:
+			bb.Update(e.Coord1[0], e.Coord1[1])
+			// Text width/height is complicated to calculate without font metrics, so we only include the anchor point.
+			// Or we could approximate:
+			// bb.Update(e.Coord1[0], e.Coord1[1] + e.Height)
+			// For now, let's Stick to the anchor point to avoid incorrect expansion.
+		}
+	}
+	return bb
 }

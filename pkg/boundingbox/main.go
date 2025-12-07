@@ -1,4 +1,4 @@
-package converter
+package boundingbox
 
 import (
 	"math"
