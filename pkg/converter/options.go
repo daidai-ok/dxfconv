@@ -38,8 +38,6 @@ type Options struct {
 	Scale float64
 	// Margin in mm
 	Margin float64
-	// Font specifies the font to use. For PDF it must be a path to a TTF file. For SVG it can be a font family name.
-	Font string
 }
 
 // DefaultOptions returns the default configuration

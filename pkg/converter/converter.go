@@ -55,11 +55,11 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 
 	switch opts.Format {
 	case FormatSVG:
-		renderer = renderers.NewSVGRenderer(w, pageW, pageH, opts.Font)
+		renderer = renderers.NewSVGRenderer(w, pageW, pageH)
 	case FormatPDF:
 		fallthrough
 	default:
-		renderer = renderers.NewPDFRenderer(w, string(opts.Orientation), pageW, pageH, opts.Font)
+		renderer = renderers.NewPDFRenderer(w, string(opts.Orientation), pageW, pageH)
 	}
 
 	renderer.Init(pageW, pageH)
@@ -70,8 +70,18 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 
 	scale := opts.Scale
 	if scale == 0 {
-		scaleX := availW / bb.Width()
-		scaleY := availH / bb.Height()
+		var scaleX, scaleY float64
+		if bb.Width() > 0 {
+			scaleX = availW / bb.Width()
+		} else {
+			scaleX = 1.0 // Default scale if width is 0 (e.g. single point or vertical line)
+		}
+		if bb.Height() > 0 {
+			scaleY = availH / bb.Height()
+		} else {
+			scaleY = 1.0 // Default scale if height is 0 (e.g. single point or horizontal line)
+		}
+
 		if scaleX < scaleY {
 			scale = scaleX
 		} else {

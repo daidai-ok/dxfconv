@@ -29,6 +29,7 @@
 -   **Upcoming Support**
     - Planning to add support for the MTEXT entity in a future release.
     - Implement our own DXF parser to eliminate reliance on third-party libraries.
+    - Implement our own SVG generator to eliminate reliance on third-party libraries.
 
 ## Installation
 
@@ -114,12 +115,6 @@ opts := &dxfconv.Options{
 	
 	// Margin: Page margin in millimeters
 	Margin:      20.0,
-	
-	// Font: 
-	// - For PDF: Path to a valid TTF font file (e.g., "fonts/Arial.ttf")
-	// - For SVG: Font family name (e.g., "Arial")
-	// If empty, a default font is used.
-	Font:        "path/to/custom-font.ttf",
 }
 
 if err := dxfconv.Convert(f, out, opts); err != nil {
@@ -136,7 +131,6 @@ if err := dxfconv.Convert(f, out, opts); err != nil {
 | `Format` | `Format` | Output format. `dxfconv.FormatPDF` or `dxfconv.FormatSVG`. | `FormatPDF` |
 | `Scale` | `float64` | Scaling factor. Set to `0.0` to automatically fit the drawing within the page margins. | `0.0` (Auto) |
 | `Margin` | `float64` | Margin around the drawing in millimeters. | `10.0` |
-| `Font` | `string` | Custom font. **PDF**: absolute/relative path to `.ttf` file. **SVG**: CSS font-family name. Required for multi-byte characters (e.g., Japanese). | `""` (Built-in font) |
 
 ## License
 
@@ -144,3 +138,4 @@ MIT License
 
 The [Go gopher](https://go.dev/blog/gopher) was designed by [Renée French](https://reneefrench.blogspot.com/).
 The project icon is based on [gophers](https://github.com/egonelbre/gophers) by [Egon Elbre](https://github.com/egonelbre), licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+This project internally uses [github.com/ajstarks/svgo](https://github.com/ajstarks/svgo), licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).

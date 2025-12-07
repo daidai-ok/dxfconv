@@ -10,20 +10,15 @@ import (
 
 // SVGRenderer implements the Renderer interface for SVG output
 type SVGRenderer struct {
-	canvas     *svg.SVG
-	width      float64
-	height     float64
-	fontFamily string
+	canvas *svg.SVG
+	width  float64
+	height float64
 }
 
 // NewSVGRenderer creates a new SVGRenderer
-func NewSVGRenderer(w io.Writer, width, height float64, font string) *SVGRenderer {
+func NewSVGRenderer(w io.Writer, width, height float64) *SVGRenderer {
 	canvas := svg.New(w)
-	fontFamily := "Arial"
-	if font != "" {
-		fontFamily = font
-	}
-	return &SVGRenderer{canvas: canvas, width: width, height: height, fontFamily: fontFamily}
+	return &SVGRenderer{canvas: canvas, width: width, height: height}
 }
 
 func (r *SVGRenderer) Init(width, height float64) {
@@ -76,7 +71,7 @@ func (r *SVGRenderer) Polyline(points [][]float64, closed bool) {
 }
 
 func (r *SVGRenderer) Text(x, y, height float64, text string) {
-	r.canvas.Text(int(x), int(y), text, "font-family:"+r.fontFamily+";font-size:"+fmt.Sprintf("%d", int(height)))
+	r.canvas.Text(int(x), int(y), text, "font-size:"+fmt.Sprintf("%d", int(height)))
 }
 
 func (r *SVGRenderer) Finish() error {
