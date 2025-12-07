@@ -51,7 +51,22 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 			for _, v := range e.Vertices {
 				bb.Update(v[0], v[1])
 			}
-			// Add other entities as needed
+		case *entity.Polyline:
+			for _, v := range e.Vertices {
+				bb.Update(v.Coord[0], v.Coord[1])
+			}
+		case *entity.Spline:
+			for _, v := range e.Controls {
+				bb.Update(v[0], v[1])
+			}
+		case *entity.Point:
+			bb.Update(e.Coord[0], e.Coord[1])
+		case *entity.Text:
+			bb.Update(e.Coord1[0], e.Coord1[1])
+			// Text width/height is complicated to calculate without font metrics, so we only include the anchor point.
+			// Or we could approximate:
+			// bb.Update(e.Coord1[0], e.Coord1[1] + e.Height)
+			// For now, let's Stick to the anchor point to avoid incorrect expansion.
 		}
 	}
 
@@ -64,11 +79,11 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 
 	switch opts.Format {
 	case FormatSVG:
-		renderer = renderers.NewSVGRenderer(w, pageW, pageH)
+		renderer = renderers.NewSVGRenderer(w, pageW, pageH, opts.Font)
 	case FormatPDF:
 		fallthrough
 	default:
-		renderer = renderers.NewPDFRenderer(w, string(opts.Orientation), pageW, pageH)
+		renderer = renderers.NewPDFRenderer(w, string(opts.Orientation), pageW, pageH, opts.Font)
 	}
 
 	renderer.Init(pageW, pageH)

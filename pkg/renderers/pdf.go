@@ -8,16 +8,24 @@ import (
 
 // PDFRenderer implements the Renderer interface for PDF output
 type PDFRenderer struct {
-	pdf    *gofpdf.Fpdf
-	writer io.Writer
+	pdf        *gofpdf.Fpdf
+	writer     io.Writer
+	fontFamily string
 }
 
 // NewPDFRenderer creates a new PDFRenderer
-func NewPDFRenderer(w io.Writer, orientation string, width, height float64) *PDFRenderer {
+func NewPDFRenderer(w io.Writer, orientation string, width, height float64, fontPath string) *PDFRenderer {
 	pdf := gofpdf.New(orientation, "mm", "A4", "")
 	pdf.AddPageFormat(orientation, gofpdf.SizeType{Wd: width, Ht: height})
 	pdf.AddPage()
-	return &PDFRenderer{pdf: pdf, writer: w}
+
+	fontFamily := "Arial"
+	if fontPath != "" {
+		pdf.AddUTF8Font("Custom", "", fontPath)
+		fontFamily = "Custom"
+	}
+
+	return &PDFRenderer{pdf: pdf, writer: w, fontFamily: fontFamily}
 }
 
 func (r *PDFRenderer) Init(width, height float64) {
@@ -48,6 +56,12 @@ func (r *PDFRenderer) Polyline(points [][]float64, closed bool) {
 		r.pdf.ClosePath()
 	}
 	r.pdf.DrawPath("D")
+}
+
+// Text draws text at the specified location
+func (r *PDFRenderer) Text(x, y, height float64, text string) {
+	r.pdf.SetFont(r.fontFamily, "", height)
+	r.pdf.Text(x, y, text)
 }
 
 func (r *PDFRenderer) Finish() error {

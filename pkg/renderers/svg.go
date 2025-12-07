@@ -1,6 +1,7 @@
 package renderers
 
 import (
+	"fmt"
 	"io"
 
 	svg "github.com/ajstarks/svgo"
@@ -8,15 +9,20 @@ import (
 
 // SVGRenderer implements the Renderer interface for SVG output
 type SVGRenderer struct {
-	canvas *svg.SVG
-	width  float64
-	height float64
+	canvas     *svg.SVG
+	width      float64
+	height     float64
+	fontFamily string
 }
 
 // NewSVGRenderer creates a new SVGRenderer
-func NewSVGRenderer(w io.Writer, width, height float64) *SVGRenderer {
+func NewSVGRenderer(w io.Writer, width, height float64, font string) *SVGRenderer {
 	canvas := svg.New(w)
-	return &SVGRenderer{canvas: canvas, width: width, height: height}
+	fontFamily := "Arial"
+	if font != "" {
+		fontFamily = font
+	}
+	return &SVGRenderer{canvas: canvas, width: width, height: height, fontFamily: fontFamily}
 }
 
 func (r *SVGRenderer) Init(width, height float64) {
@@ -54,6 +60,10 @@ func (r *SVGRenderer) Polyline(points [][]float64, closed bool) {
 	} else {
 		r.canvas.Polyline(x, y, style)
 	}
+}
+
+func (r *SVGRenderer) Text(x, y, height float64, text string) {
+	r.canvas.Text(int(x), int(y), text, "font-family:"+r.fontFamily+";font-size:"+fmt.Sprintf("%d", int(height)))
 }
 
 func (r *SVGRenderer) Finish() error {

@@ -34,5 +34,32 @@ func drawEntity(r Renderer, e entity.Entity, scale float64, offsetX, offsetY flo
 			points[i] = []float64{transformX(v[0]), transformY(v[1])}
 		}
 		r.Polyline(points, e.Closed)
+	case *entity.Polyline:
+		if len(e.Vertices) < 2 {
+			return
+		}
+		points := make([][]float64, len(e.Vertices))
+		for i, v := range e.Vertices {
+			points[i] = []float64{transformX(v.Coord[0]), transformY(v.Coord[1])}
+		}
+		// Flag & 1 indicates closed polyline
+		closed := e.Flag&1 == 1
+		r.Polyline(points, closed)
+	case *entity.Spline:
+		if len(e.Controls) < 2 {
+			return
+		}
+		// Approximation by control points
+		points := make([][]float64, len(e.Controls))
+		for i, v := range e.Controls {
+			points[i] = []float64{transformX(v[0]), transformY(v[1])}
+		}
+		r.Polyline(points, false)
+	case *entity.Point:
+		// Draw as a small circle, simplistic representation
+		radius := 1.0 * scale // Fixed visual size or scaled
+		r.Circle(transformX(e.Coord[0]), transformY(e.Coord[1]), radius)
+	case *entity.Text:
+		r.Text(transformX(e.Coord1[0]), transformY(e.Coord1[1]), e.Height*scale, e.Value)
 	}
 }

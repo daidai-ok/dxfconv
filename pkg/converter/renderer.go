@@ -12,6 +12,8 @@ type Renderer interface {
 	Arc(x, y, r, startAngle, endAngle float64)
 	// Polyline draws a polyline
 	Polyline(points [][]float64, closed bool)
+	// Text draws text at the specified location
+	Text(x, y, height float64, text string)
 	// Finish finalizes the rendering and writes to output
 	Finish() error
 }
