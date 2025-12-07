@@ -29,7 +29,7 @@ package main
 
 import (
 	"os"
-	"dxfconv"
+	dxfconv "dxfconv/pkg/converter"
 )
 
 func main() {

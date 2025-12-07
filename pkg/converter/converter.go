@@ -28,13 +28,15 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 	if err != nil {
 		return &dxfconverror.InternalError{Err: fmt.Errorf("failed to create temp file: %w", err)}
 	}
-	defer os.Remove(tempFile.Name()) // clean up
+	defer func() {
+		_ = os.Remove(tempFile.Name()) // clean up
+	}()
 
 	_, err = io.Copy(tempFile, r)
 	if err != nil {
 		return &dxfconverror.InternalError{Err: fmt.Errorf("failed to write to temp file: %w", err)}
 	}
-	tempFile.Close()
+	_ = tempFile.Close()
 
 	dxfDrawing, err := dxf.Open(tempFile.Name())
 	if err != nil {
