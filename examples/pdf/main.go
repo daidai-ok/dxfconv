@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run main.go <input.dxf> <output.pdf>")
+		fmt.Println("Usage: go run main.go <sample_input.dxf> <sample_output.pdf>")
 		os.Exit(1)
 	}
 
@@ -31,7 +31,7 @@ func main() {
 	defer outputFile.Close()
 
 	opts := dxfconverter.DefaultOptions()
-	opts.Format = dxfconverter.FormatSVG
+	opts.Format = dxfconverter.FormatPDF
 	// Example: Customize options if needed
 	// opts.Orientation = dxfconverter.OrientationLandscape
 
