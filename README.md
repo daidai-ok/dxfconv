@@ -31,6 +31,16 @@
     - Implement our own DXF parser to eliminate reliance on third-party libraries.
     - Implement our own SVG generator to eliminate reliance on third-party libraries.
 
+
+## Process Flow
+
+1.  **Load File**: Reads the input and creates a temporary file.
+2.  **Parse**: Parses the DXF content.
+3.  **Render**: Renders the result as PDF or SVG.
+
+> [!WARNING]
+> Since a temporary file is created for each conversion, please be mindful of the open file descriptor limit (`ulimit -n`) when running high-concurrency processing.
+
 ## Installation
 
 ```bash
@@ -131,6 +141,10 @@ if err := dxfconv.Convert(f, out, opts); err != nil {
 | `Format` | `Format` | Output format. `dxfconv.FormatPDF` or `dxfconv.FormatSVG`. | `FormatPDF` |
 | `Scale` | `float64` | Scaling factor. Set to `0.0` to automatically fit the drawing within the page margins. | `0.0` (Auto) |
 | `Margin` | `float64` | Margin around the drawing in millimeters. | `10.0` |
+
+## Thread Safety
+
+`dxfconv` is thread-safe. It is safe to use `Convert` function concurrently from multiple goroutines.
 
 ## License
 
