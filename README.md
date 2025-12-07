@@ -25,21 +25,17 @@
     -   POLYLINES
     -   SPLINES
     -   TEXT
+	-   MTEXT
 -   **Customization**: Control page size (A4, A3, etc.), orientation (Portrait, Landscape), and scaling.
+-   **Multi-Architecture**: Supports both Arm and Intel CPU architectures.
 -   **Upcoming Support**
-    - Planning to add support for the MTEXT entity in a future release.
-    - Implement our own DXF parser to eliminate reliance on third-party libraries.
     - Implement our own SVG generator to eliminate reliance on third-party libraries.
-
 
 ## Process Flow
 
 1.  **Load File**: Reads the input and creates a temporary file.
 2.  **Parse**: Parses the DXF content.
 3.  **Render**: Renders the result as PDF or SVG.
-
-> [!WARNING]
-> Since a temporary file is created for each conversion, please be mindful of the open file descriptor limit (`ulimit -n`) when running high-concurrency processing.
 
 ## Installation
 
