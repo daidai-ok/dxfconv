@@ -43,21 +43,30 @@ func (p *PDF) Circle(x, y, r float64) {
 	k := 0.552284749831 * r
 	cx, cy := x, p.height-y // center (flip Y for PDF coordinates)
 
-	// Let's just draw standard circle around cx, cy
+	// draw standard circle around cx, cy
 	// P1: (r, 0)
-	// C1: (r, k)
-	// C2: (k, r)
-	// P2: (0, r)
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx+r, cy+k, cx+k, cy+r, cx, cy+r))
+	// C1: (r, k)  -> (r, -k) for Y flip
+	// C2: (k, r)  -> (k, -r) for Y flip
+	// P2: (0, r)  -> (0, -r) for Y flip
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx+r, cy-k, cx+k, cy-r, cx, cy-r))
 
 	// P2: (0, r) -> P3: (-r, 0)
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx-k, cy+r, cx-r, cy+k, cx-r, cy))
+	// C1: (-k, r) -> (-k, -r)
+	// C2: (-r, k) -> (-r, -k)
+	// P3: (-r, 0) -> (-r, 0)
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx-k, cy-r, cx-r, cy-k, cx-r, cy))
 
 	// P3: (-r, 0) -> P4: (0, -r)
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx-r, cy-k, cx-k, cy-r, cx, cy-r))
+	// C1: (-r, -k) -> (-r, k)
+	// C2: (-k, -r) -> (-k, r)
+	// P4: (0, -r)  -> (0, r)
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c\n", cx-r, cy+k, cx-k, cy+r, cx, cy+r))
 
 	// P4: (0, -r) -> P1: (r, 0)
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c S\n", cx+k, cy-r, cx+r, cy-k, cx+r, cy))
+	// C1: (k, -r) -> (k, r)
+	// C2: (r, -k) -> (r, k)
+	// P1: (r, 0)
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f %.2f %.2f %.2f %.2f c S\n", cx+k, cy+r, cx+r, cy+k, cx+r, cy))
 }
 
 // Arc draws an arc
@@ -78,13 +87,14 @@ func (p *PDF) Arc(x, y, r, startAngle, endAngle float64) {
 	}
 
 	// Move to start
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f m\n", cx+r*math.Cos(startRad), cy+r*math.Sin(startRad)))
+	// Note: We subtract r*sin(a) because PDF Y is up, but Input Y is down (so positive angle component in Y means "down" in PDF = minus Y)
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f m\n", cx+r*math.Cos(startRad), cy-r*math.Sin(startRad)))
 
 	for a := startRad; a <= endRad; a += step * math.Pi / 180 {
-		p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f l\n", cx+r*math.Cos(a), cy+r*math.Sin(a)))
+		p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f l\n", cx+r*math.Cos(a), cy-r*math.Sin(a)))
 	}
 	// Final point
-	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f l S\n", cx+r*math.Cos(endRad), cy+r*math.Sin(endRad)))
+	p.currentBuf.WriteString(fmt.Sprintf("%.2f %.2f l S\n", cx+r*math.Cos(endRad), cy-r*math.Sin(endRad)))
 }
 
 // Text draws text
