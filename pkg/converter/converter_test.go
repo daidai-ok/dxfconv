@@ -1,4 +1,4 @@
-package dxfconv
+package converter
 
 import (
 	"bytes"

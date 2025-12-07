@@ -1,4 +1,4 @@
-package dxfconv
+package converter
 
 // Renderer defines the interface for drawing backend
 type Renderer interface {

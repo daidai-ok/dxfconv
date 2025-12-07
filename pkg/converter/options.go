@@ -1,4 +1,4 @@
-package dxfconv
+package converter
 
 // PageSize represents the dimensions of the PDF page
 type PageSize struct {

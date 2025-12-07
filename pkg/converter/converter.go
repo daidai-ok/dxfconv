@@ -1,4 +1,4 @@
-package dxfconv
+package converter
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 
-	"dxfconv/renderers"
+	"dxfconv/pkg/renderers"
 )
 
 // Convert reads DXF data from r and writes PDF data to w

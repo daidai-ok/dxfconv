@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	dxfconverter "dxfconv"
+	dxfconverter "dxfconv/pkg/converter"
 )
 
 func main() {

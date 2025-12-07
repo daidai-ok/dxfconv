@@ -1,4 +1,4 @@
-package dxfconv
+package converter
 
 import (
 	"github.com/yofu/dxf/entity"
