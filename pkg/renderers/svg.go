@@ -3,6 +3,7 @@ package renderers
 import (
 	"fmt"
 	"io"
+	"math"
 
 	svg "github.com/ajstarks/svgo"
 )
@@ -39,12 +40,24 @@ func (r *SVGRenderer) Circle(x, y, radius float64) {
 }
 
 func (r *SVGRenderer) Arc(x, y, radius, startAngle, endAngle float64) {
-	// svgo Arc is (x, y, rx, ry, rot, large, sweep, ex, ey)
-	// We need to calculate end point from angles.
-	// This is a bit complex for SVG paths.
-	// For now, let's approximate or implement arc path calculation.
-	r.canvas.Arc(int(x), int(y), int(radius), int(radius), 0, false, false, int(x+radius), int(y), "fill:none;stroke:black")
-	// TODO: Correct Arc implementation
+	startRad := startAngle * math.Pi / 180
+	endRad := endAngle * math.Pi / 180
+
+	sx := int(x + radius*math.Cos(startRad))
+	sy := int(y + radius*math.Sin(startRad))
+	ex := int(x + radius*math.Cos(endRad))
+	ey := int(y + radius*math.Sin(endRad))
+
+	large := false
+	diff := endAngle - startAngle
+	if diff < 0 {
+		diff += 360
+	}
+	if diff > 180 {
+		large = true
+	}
+
+	r.canvas.Arc(sx, sy, int(radius), int(radius), 0, large, true, ex, ey, "fill:none;stroke:black")
 }
 
 func (r *SVGRenderer) Polyline(points [][]float64, closed bool) {

@@ -2,6 +2,7 @@ package converter
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestConvert_PDF(t *testing.T) {
-	dxfData, err := os.ReadFile("testdata/overall.dxf")
+	dxfData, err := os.ReadFile("../../fixtures/overall.dxf")
 	if err != nil {
 		t.Fatalf("Failed to read encoded DXF: %v", err)
 	}
@@ -38,7 +39,7 @@ func TestConvert_PDF(t *testing.T) {
 }
 
 func TestConvert_SVG(t *testing.T) {
-	dxfData, err := os.ReadFile("testdata/overall.dxf")
+	dxfData, err := os.ReadFile("../../fixtures/overall.dxf")
 	if err != nil {
 		t.Fatalf("Failed to read encoded DXF: %v", err)
 	}
@@ -62,6 +63,40 @@ func TestConvert_SVG(t *testing.T) {
 	}
 }
 
+func TestConvert_Arc(t *testing.T) {
+	dxfData, err := os.ReadFile("../../fixtures/arc.dxf")
+	if err != nil {
+		t.Fatalf("Failed to read encoded DXF: %v", err)
+	}
+	r := bytes.NewReader(dxfData)
+	var w bytes.Buffer
+	opts := DefaultOptions()
+	opts.Format = FormatSVG
+
+	err = Convert(r, &w, opts)
+	if err != nil {
+		t.Fatalf("Convert failed: %v", err)
+	}
+
+	if w.Len() == 0 {
+		t.Error("Expected output to be written, but got 0 bytes")
+	}
+
+	output := w.String()
+	// Basic check for SVG tag
+	if !strings.Contains(output, "<svg") {
+		t.Error("Expected SVG output to contain <svg tag")
+	}
+	// svgo Arc uses path
+	if !strings.Contains(output, "<path") {
+		t.Error("Expected SVG output to contain <path tag for Arc")
+	}
+	// We expect it to be an arc, so it should have the A command in d attribute
+	if !strings.Contains(output, " d=\"M") || !strings.Contains(output, "A") {
+		t.Error("Expected SVG path to contain Move (M) and Arc (A) commands")
+	}
+}
+
 type FaultyReader struct{}
 
 func (f *FaultyReader) Read(p []byte) (n int, err error) {
@@ -77,13 +112,43 @@ func TestConvert_ReadError(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for faulty reader, but got nil")
 	}
+
+	var internalErr *InternalError
+	if !errors.As(err, &internalErr) {
+		t.Errorf("Expected InternalError, got %T: %v", err, err)
+	}
+
 	if !strings.Contains(err.Error(), "simulated read error") {
 		t.Errorf("Expected error measure to contain 'simulated read error', got: %v", err)
 	}
 }
 
+func TestConvert_BrokenDXF(t *testing.T) {
+	dxfData, err := os.ReadFile("../../fixtures/broken.dxf")
+	if err != nil {
+		t.Fatalf("Failed to read broken DXF: %v", err)
+	}
+	r := bytes.NewReader(dxfData)
+	var w bytes.Buffer
+	opts := DefaultOptions()
+
+	err = Convert(r, &w, opts)
+	if err == nil {
+		t.Fatal("Expected error for broken DXF, but got nil")
+	}
+
+	var parseErr *ParseError
+	if !errors.As(err, &parseErr) {
+		t.Errorf("Expected ParseError, got %T: %v", err, err)
+	}
+
+	if !strings.Contains(err.Error(), "line 15") {
+		t.Errorf("Expected error measure to contain 'line 15', got: %v", err)
+	}
+}
+
 func TestDrawing_Entities(t *testing.T) {
-	dxfPath := "testdata/overall.dxf"
+	dxfPath := "../../fixtures/overall.dxf"
 	drawing, err := dxf.Open(dxfPath)
 	if err != nil {
 		t.Fatalf("Failed to open DXF from %s: %v", dxfPath, err)
@@ -119,7 +184,7 @@ func TestDrawing_NewEntities(t *testing.T) {
 	}{
 		{
 			name:     "Points",
-			filename: "testdata/points.dxf",
+			filename: "../../fixtures/points.dxf",
 			check: func(t *testing.T, d *drawing.Drawing) {
 				entities := d.Entities()
 				if len(entities) != 1 {
@@ -139,7 +204,7 @@ func TestDrawing_NewEntities(t *testing.T) {
 		},
 		{
 			name:     "Polylines",
-			filename: "testdata/polylines.dxf",
+			filename: "../../fixtures/polylines.dxf",
 			check: func(t *testing.T, d *drawing.Drawing) {
 				entities := d.Entities()
 				if len(entities) != 1 {
@@ -156,7 +221,7 @@ func TestDrawing_NewEntities(t *testing.T) {
 		},
 		{
 			name:     "Text",
-			filename: "testdata/text.dxf",
+			filename: "../../fixtures/text.dxf",
 			check: func(t *testing.T, d *drawing.Drawing) {
 				entities := d.Entities()
 				if len(entities) != 1 {
@@ -168,6 +233,23 @@ func TestDrawing_NewEntities(t *testing.T) {
 				}
 				if text.Value != "Hello World" {
 					t.Errorf("Expected Text 'Hello World', got '%v'", text.Value)
+				}
+			},
+		},
+		{
+			name:     "Arc",
+			filename: "../../fixtures/arc.dxf",
+			check: func(t *testing.T, d *drawing.Drawing) {
+				entities := d.Entities()
+				if len(entities) != 1 {
+					t.Fatalf("Expected 1 entity, got %d", len(entities))
+				}
+				arc, ok := entities[0].(*entity.Arc)
+				if !ok {
+					t.Fatalf("Expected entity type *entity.Arc, got %T", entities[0])
+				}
+				if arc.Radius != 100.0 {
+					t.Errorf("Expected Radius 100.0, got %v", arc.Radius)
 				}
 			},
 		},

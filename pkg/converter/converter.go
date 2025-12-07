@@ -20,21 +20,22 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 	// Since github.com/yofu/dxf mainly works with files, we might need a workaround if it doesn't support io.Reader directly.
 	// Checking the library... usually Open takes a filename.
 	// If the library only supports file paths, we might need to change the API or write to a temp file.
+	// TODO: In the future, we aim to remove the dependency on github.com/yofu/dxf to allow for more flexible inclusion of metadata such as error location in parse errors.
 	tempFile, err := os.CreateTemp("", "dxf-*.dxf")
 	if err != nil {
-		return fmt.Errorf("failed to create temp file: %w", err)
+		return &InternalError{Err: fmt.Errorf("failed to create temp file: %w", err)}
 	}
 	defer os.Remove(tempFile.Name()) // clean up
 
 	_, err = io.Copy(tempFile, r)
 	if err != nil {
-		return fmt.Errorf("failed to write to temp file: %w", err)
+		return &InternalError{Err: fmt.Errorf("failed to write to temp file: %w", err)}
 	}
 	tempFile.Close()
 
 	dxfDrawing, err := dxf.Open(tempFile.Name())
 	if err != nil {
-		return fmt.Errorf("failed to open DXF: %w", err)
+		return &ParseError{Err: fmt.Errorf("failed to parse DXF: %w", err)}
 	}
 
 	// Calculate Bounding Box
@@ -135,5 +136,8 @@ func Convert(r io.Reader, w io.Writer, opts *Options) error {
 		drawEntity(renderer, e, scale, realOffsetX, realOffsetY, pageH)
 	}
 
-	return renderer.Finish()
+	if err := renderer.Finish(); err != nil {
+		return &RenderingError{Err: err}
+	}
+	return nil
 }
