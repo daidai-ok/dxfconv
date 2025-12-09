@@ -41,6 +41,7 @@
 
 ```bash
 go get github.com/daidai-ok/dxfconv
+go mod tidy
 ```
 
 ## Usage
