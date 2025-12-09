@@ -147,6 +147,6 @@ if err := dxfconv.Convert(f, out, opts); err != nil {
 
 MIT License
 
-The [Go gopher](https://go.dev/blog/gopher) was designed by [Renée French](https://reneefrench.blogspot.com/).
-The project icon is based on [gophers](https://github.com/egonelbre/gophers) by [Egon Elbre](https://github.com/egonelbre), licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+- The [Go gopher](https://go.dev/blog/gopher) was designed by [Renée French](https://reneefrench.blogspot.com/).
 
+- The project icon is based on [gophers](https://github.com/egonelbre/gophers) by [Egon Elbre](https://github.com/egonelbre), licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
